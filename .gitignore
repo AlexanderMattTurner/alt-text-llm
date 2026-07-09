@@ -31,5 +31,7 @@ env/
 asset_queue.json
 suggested_alts.json
 asset_captions.json
-scripts/
+# Anchored to the repo-root output dir only; must not match .github/scripts/,
+# which holds tracked, template-synced CI scripts.
+/scripts/
 *~

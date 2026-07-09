@@ -63,7 +63,7 @@ COMMITTED_VERSION=$(grep -E '^__version__' "$VERSION_FILE" | sed -E 's/.*"([^"]+
 # version that was *just* published — which then fails upload with
 # "400 File already exists". The git tag created at release time does not lag,
 # so folding it into the base prevents that race.
-PYPI_JSON=$(curl -fsS "https://pypi.org/pypi/${PACKAGE_NAME}/json" 2>/dev/null || echo "")
+PYPI_JSON=$(curl -fsS --max-time 30 "https://pypi.org/pypi/${PACKAGE_NAME}/json" 2>/dev/null || echo "")
 PYPI_VERSION=""
 if [ -n "$PYPI_JSON" ]; then
   PYPI_VERSION=$(echo "$PYPI_JSON" | python -c "import json,sys; print(json.load(sys.stdin)['info']['version'])")

@@ -24,6 +24,7 @@ jobs:
     name: Auto-bump version and publish to PyPI
     needs: test
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: write # Push the version-bump commit, tag, and Release
       id-token: write # Required for trusted publishing
