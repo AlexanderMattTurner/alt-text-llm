@@ -39,11 +39,13 @@ jobs:
           # Full history + tags so version_bump.sh can analyze the commit range
           # since the last release tag.
           fetch-depth: 0
-          # Persist a token that can bypass the `main` branch ruleset, so the
-          # version-bump commit below can be pushed directly. The default
-          # GITHUB_TOKEN is bound by the "Run tests" required status check, and
-          # the bump commit is `[skip ci]`, so it can never satisfy that check.
-          token: ${{ secrets.AUTOPUBLISH_TOKEN }}
+          # Persist a token that can bypass the `main` branch ruleset so the
+          # [skip ci] version-bump commit + tag below can be pushed directly (the
+          # default GITHUB_TOKEN is bound by the "Run tests" required check the
+          # [skip ci] commit can never satisfy). TEMPLATE_SYNC_TOKEN_ORG is the
+          # org PAT registered as a ruleset bypass actor for the current owner;
+          # falls back to GITHUB_TOKEN only when unset (a fork).
+          token: ${{ secrets.TEMPLATE_SYNC_TOKEN_ORG || secrets.GITHUB_TOKEN }}
 
       - name: Set up Python
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
@@ -79,7 +81,7 @@ jobs:
       - name: Commit version bump, tag, and create GitHub Release
         if: steps.bump.outputs.should_publish == 'true'
         env:
-          GH_TOKEN: ${{ secrets.AUTOPUBLISH_TOKEN }}
+          GH_TOKEN: ${{ secrets.TEMPLATE_SYNC_TOKEN_ORG || secrets.GITHUB_TOKEN }}
           VERSION: ${{ steps.bump.outputs.version }}
         run: |
           set -euo pipefail
@@ -87,9 +89,10 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           # Commit the bumped __version__ back to main. [skip ci] keeps this
           # push from spawning another publish run. The push uses
-          # AUTOPUBLISH_TOKEN (persisted at checkout), whose account can bypass
-          # the `main` ruleset, so the `[skip ci]` commit is accepted despite the
-          # required "Run tests" status check. Kept non-fatal as a backstop: the
+          # TEMPLATE_SYNC_TOKEN_ORG (persisted at checkout), the org PAT
+          # registered as a ruleset bypass actor, so the `[skip ci]` commit is
+          # accepted despite the required "Run tests" status check. Kept
+          # non-fatal as a backstop: the
           # release is already on PyPI, and PyPI is the source of truth for the
           # next bump, so a rejected push must not fail an otherwise-good release.
           git add alt_text_llm/__init__.py
