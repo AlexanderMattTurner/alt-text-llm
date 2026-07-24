@@ -1,5 +1,23 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+<<<<<<< local
+=======
+  "env": {
+    "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "400000",
+    "CLAUDE_CODE_AUTO_BACKGROUND_TASKS": "1",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
+  },
+  "permissions": {
+    "deny": [
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Bash(*env -i*)",
+      "Bash(*env --ignore-environment*)"
+    ]
+  },
+>>>>>>> template
   "hooks": {
     "SessionStart": [
       {
@@ -14,12 +32,51 @@
     ],
     "Stop": [
       {
+<<<<<<< local
         "matcher": "",
         "hooks": [
           {
             "type": "command",
             "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/verify-ci-on-stop.sh",
             "timeout": 300
+=======
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(git push:*)",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/safe-launch.sh \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/pre-push-check.sh",
+            "timeout": 1800
+          },
+          {
+            "type": "command",
+            "if": "Bash(gh pr create:*)",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/safe-launch.sh \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/pre-push-check.sh",
+            "timeout": 1800
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/parallelism-nudge.mjs",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/drop-superseded-ci-events.mjs",
+            "timeout": 15
+>>>>>>> template
           }
         ]
       }
