@@ -29,10 +29,6 @@ pip_install_if_missing() {
 webi_install_if_missing() {
   local cmd="$1"
   if ! command -v "$cmd" &>/dev/null; then
-<<<<<<< local
-    echo "Installing $cmd..."
-    curl -sS "https://webi.sh/$cmd" | sh >/dev/null 2>&1 || warn "Failed to install $cmd"
-=======
     local installer
     installer=$(mktemp "${TMPDIR:-/tmp}/webi-${cmd}-XXXXXX.sh")
     # webi.sh serves a per-tool bootstrap generated on the fly, so there is no
@@ -50,13 +46,10 @@ webi_install_if_missing() {
       warn "Failed to download installer for $cmd"
     fi
     rm -f "$installer"
->>>>>>> template
   fi
 }
 
 #######################################
-<<<<<<< local
-=======
 # Hook syntax validation
 #######################################
 
@@ -93,7 +86,6 @@ _check_hook_syntax() {
 _check_hook_syntax
 
 #######################################
->>>>>>> template
 # PATH setup
 #######################################
 
@@ -135,11 +127,6 @@ git config core.hooksPath .hooks
 # GitHub CLI auth
 #######################################
 
-<<<<<<< local
-if [ -n "${GH_TOKEN:-}" ] && command -v gh &>/dev/null; then
-  echo "Configuring GitHub authentication..."
-  echo "$GH_TOKEN" | gh auth login --with-token 2>&1 || warn "Failed to authenticate with GitHub"
-=======
 if ! command -v gh &>/dev/null; then
   warn "gh CLI not found"
 elif [[ -z "${GH_TOKEN:-}" ]]; then
@@ -200,7 +187,6 @@ if [[ "$remote_url" =~ ^https?://[^/@]*@127\.0\.0\.1(:[0-9]+)?/git/ ]]; then
 }
 SETTINGS
   fi
->>>>>>> template
 fi
 
 #######################################
