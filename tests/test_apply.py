@@ -808,7 +808,7 @@ def test_apply_caption_with_none_line_number(temp_dir: Path, console: Console) -
     """Test that apply works when line_number is None."""
     md_path = temp_dir / "test.md"
     content = """# Test
-    
+
 ![old alt](image.png)
 
 More content.

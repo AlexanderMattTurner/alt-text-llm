@@ -139,9 +139,9 @@ def test_get_line_number_raises_error_when_asset_not_found(
     md_content = textwrap.dedent(
         """
         # Title
-        
+
         Some content here.
-        
+
         ![Different image](other.png)
         """
     )
@@ -166,9 +166,9 @@ def test_html_img_error_when_src_not_in_content(tmp_path: Path) -> None:
     md_content = textwrap.dedent(
         """
         # Title
-        
+
         Some content.
-        
+
         <img src="findable.jpg" alt="">
         """
     )
@@ -240,11 +240,11 @@ def test_build_queue_wikilink_without_alt(tmp_path: Path) -> None:
     md_content = textwrap.dedent(
         """
         # Test Document
-        
+
         Here is a wikilink image without alt text:
-        
+
         ![[assets/image.png]]
-        
+
         End of document.
         """
     )
@@ -265,15 +265,15 @@ def test_wikilink_line_numbers(tmp_path: Path) -> None:
         ---
         title: Test
         ---
-        
+
         First paragraph.
-        
+
         ![[image1.png]]
-        
+
         Second paragraph.
-        
+
         ![[image2.png]]
-        
+
         Third paragraph.
         """
     )

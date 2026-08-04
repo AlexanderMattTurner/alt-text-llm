@@ -1,0 +1,28 @@
+# Hooks for the `pre-commit` workflow, whose `pre-commit-passed` check the
+# branch ruleset requires. Deliberately upstream-only: every hook below is
+# fetched by rev, so none depends on a script in this repo that a template sync
+# could move or remove.
+#
+# ruff is pinned to the same version pyproject.toml pins for CI, so a local run
+# and `ruff check alt_text_llm` cannot disagree about what is a finding.
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      - id: trailing-whitespace
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.5
+    hooks:
+      # `ruff check` only. `test.yml` gates on `ruff check alt_text_llm` and
+      # nothing has ever enforced formatting here, so adding ruff-format would
+      # reformat 15 files and start enforcing a rule this repo never adopted.
+      # Adopting it is a separate decision with a separate diff.
+      - id: ruff-check
+        args: [--fix]
