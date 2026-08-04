@@ -146,7 +146,7 @@ jobs:
     outputs:
       prs: ${{ steps.discover.outputs.prs }}
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           sparse-checkout: .github/scripts
           persist-credentials: false
@@ -275,7 +275,7 @@ jobs:
       AUTO_RESOLVE_PROTECTED_RE: ${{ vars.AUTO_RESOLVE_PROTECTED_RE }}
     steps:
       - name: Checkout PR head
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # matrix.pr.head_ref is a same-repo branch name (discover drops forks),
           # so this is a trusted ref; scripts authenticate git out-of-band, so no
@@ -520,7 +520,7 @@ jobs:
       AUTO_RESOLVE_PROTECTED_RE: ${{ vars.AUTO_RESOLVE_PROTECTED_RE }}
     steps:
       - name: Checkout the PR head
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # The PR's own content, but nothing in this job executes it: it is
           # here so git has the objects the bundle is thin against and a
