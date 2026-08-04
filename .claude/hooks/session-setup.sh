@@ -17,6 +17,16 @@ die() {
 }
 is_root() { [ "$(id -u)" = "0" ]; }
 
+# Append `export NAME=<value>` to the session env file, quoting the value with
+# bash's @Q operator. Interpolating a value straight into a double-quoted string
+# (e.g. "export X=\"$val\"") is not escaping it — a value containing a `"` or `$`
+# becomes arbitrary code in whatever later sources this file.
+emit_export() {
+  local name="$1" value="$2"
+  [[ -n "${CLAUDE_ENV_FILE:-}" ]] || return 0
+  echo "export $name=${value@Q}" >>"$CLAUDE_ENV_FILE"
+}
+
 # Install a command via pip if missing
 pip_install_if_missing() {
   local cmd="$1" pkg="${2:-$1}"
@@ -27,7 +37,7 @@ pip_install_if_missing() {
 
 # Install a command via webi if missing
 webi_install_if_missing() {
-  local cmd="$1"
+  local cmd="$1" pkg="${2:-$1}"
   if ! command -v "$cmd" &>/dev/null; then
     local installer
     installer=$(mktemp "${TMPDIR:-/tmp}/webi-${cmd}-XXXXXX.sh")

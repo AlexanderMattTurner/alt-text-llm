@@ -2,5 +2,20 @@
   "name": "alt-text-llm",
   "private": true,
   "description": "Node manifest for CI only. This is a Python package; nothing here ships. The pre-commit workflow synced from claude-automation-template runs `pnpm install` before its hooks, and pnpm exits non-zero with no manifest to read.",
-  "packageManager": "pnpm@10.28.2"
+  "packageManager": "pnpm@10.28.2",
+  "scripts": {
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "lint-staged": "^17.0.5",
+    "prettier": "3.9.6"
+  },
+  "lint-staged": {
+    "*.{json,md,yaml,yml,css,scss,js,mjs,ts,tsx}": [
+      "prettier --write"
+    ],
+    "*.py": [
+      "ruff check --fix"
+    ]
+  }
 }

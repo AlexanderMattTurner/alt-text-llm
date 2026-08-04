@@ -35,3 +35,11 @@ asset_captions.json
 # which holds tracked, template-synced CI scripts.
 /scripts/
 *~
+
+# Node artifacts. package.json exists only so the synced pre-commit workflow's
+# `pnpm install` has a manifest to read; nothing here ships, and CI resolves
+# from package.json against the registry rather than a committed lockfile.
+node_modules/
+pnpm-lock.yaml
+
+.claude/settings.local.json
