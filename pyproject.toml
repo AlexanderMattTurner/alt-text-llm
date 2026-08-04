@@ -52,6 +52,14 @@ dev = [
     "ruff==0.14.5",
 ]
 
+[tool.uv]
+# `.claude/hooks/pre-push-check.sh` runs `uv run ruff check .`, and `uv run`
+# does not install [project.optional-dependencies] — so ruff was absent from the
+# environment on any machine that had not already synced the dev extra, and the
+# hook died with "Failed to spawn: ruff". uv installs this group by default.
+# Same pin as the dev extra and .pre-commit-config.yaml; move all three together.
+dev-dependencies = ["ruff==0.14.5"]
+
 [tool.pytest.ini_options]
 addopts = "--cov=alt_text_llm --cov-report=html -n auto"
 testpaths = ["tests"]

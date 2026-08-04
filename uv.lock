@@ -31,6 +31,11 @@ dev = [
     { name = "types-requests" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "ruff" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "argcomplete", specifier = ">=3" },
@@ -50,6 +55,9 @@ requires-dist = [
     { name = "types-requests", marker = "extra == 'dev'" },
 ]
 provides-extras = ["dev"]
+
+[package.metadata.requires-dev]
+dev = [{ name = "ruff", specifier = "==0.14.5" }]
 
 [[package]]
 name = "argcomplete"
