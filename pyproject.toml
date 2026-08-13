@@ -49,7 +49,7 @@ dev = [
     # version reports in the same change.
     "mypy==2.3.0",
     "types-requests",
-    "ruff==0.14.5",
+    "ruff==0.16.2",
 ]
 
 [tool.uv]
@@ -58,7 +58,7 @@ dev = [
 # environment on any machine that had not already synced the dev extra, and the
 # hook died with "Failed to spawn: ruff". uv installs this group by default.
 # Same pin as the dev extra and .pre-commit-config.yaml; move all three together.
-dev-dependencies = ["ruff==0.14.5"]
+dev-dependencies = ["ruff==0.16.2"]
 
 [tool.pytest.ini_options]
 addopts = "--cov=alt_text_llm --cov-report=html -n auto"
