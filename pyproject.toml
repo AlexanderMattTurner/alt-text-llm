@@ -47,7 +47,7 @@ dev = [
     # what happened: ruff 0.16 reported 19 findings that 0.14.5 does not, and
     # every PR went red at once. Bump these deliberately, fixing what the new
     # version reports in the same change.
-    "mypy==2.3.0",
+    "mypy==2.3.1",
     "types-requests",
     "ruff==0.14.5",
 ]
