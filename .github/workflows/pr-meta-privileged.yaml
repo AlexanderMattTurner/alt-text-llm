@@ -30,7 +30,7 @@ on:
 permissions: {}
 
 jobs:
-  # ── cancel-on-pr-close.yaml ──────────────────────────────────────────────
+  # ── Cancel superseded PR runs on close ───────────────────────────────────────────────────────────────────────────────
   # SECURITY — pull_request_target is safe here because this job runs NO PR-authored
   # code. The only checkout is a sparse checkout of the BASE repo's own
   # .github/scripts at the trusted base ref (pull_request_target checks out the base,
@@ -65,9 +65,10 @@ jobs:
           REPO: ${{ github.repository }}
           HEAD_REF: ${{ github.event.pull_request.head.ref }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          CLOSED_AT: ${{ github.event.pull_request.closed_at }}
         run: bash .github/scripts/cancel-pr-runs.sh
 
-  # ── merge-conflict-labeler.yaml ──────────────────────────────────────────
+  # ── Merge-conflict labeler ─────────────────────────────────────────────────────────────────────────────────────────
   # pull_request_target (not pull_request) so the label write has a write-scoped
   # token even from forks; it checks out only base-repo `.github/scripts` with no
   # persisted credentials and runs no PR-authored code, so the elevated token
@@ -100,7 +101,31 @@ jobs:
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
-          sparse-checkout: .github/scripts
+          sparse-checkout: |
+            .github/scripts
+            .github/tool-versions.sh
+            .github/workflows/auto-resolve-conflicts.yaml
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+      # run-with-pyyaml.sh fetches PyYAML through uv. No cache: this job holds
+      # credentials, and a cache another run wrote is input it never reviewed.
+      - uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
+        with:
+          enable-cache: false
+      # The labeler runs with a write token, so it comes from the SAME pinned
+      # resolver commit auto-resolve-conflicts.yaml calls, never a moving branch
+      # whose owner could change what runs here.
+      - name: Read the resolver pin
+        id: pin
+        run: bash .github/scripts/run-with-pyyaml.sh .github/scripts/resolver-ref.py --github-output
+      # The labeler ships WITH the resolver it triggers, so no repository keeps a
+      # copy of it to drift from the label the resolver reads.
+      - name: Check out the resolver that provides the labeler
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: ${{ steps.pin.outputs.repository }}
+          ref: ${{ steps.pin.outputs.ref }}
+          path: resolver
           persist-credentials: false
       - name: Sync merge-conflict labels
         env:
@@ -116,4 +141,4 @@ jobs:
             ${{ github.event_name == 'pull_request_target' && '6'
              || github.event_name == 'push' && '4'
              || '2' }}
-        run: bash .github/scripts/label-merge-conflicts.sh
+        run: bash resolver/.github/resolver/label-merge-conflicts.sh
