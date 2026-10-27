@@ -22,19 +22,21 @@
 #      and workflows. Letting those merge unattended is the supervision stack
 #      approving changes to itself. Reuses AUTO_RESOLVE_PROTECTED_RE so there is
 #      one definition of "a human should look at this", not two.
+#   5. NO KEPT-LOCAL CONFLICT. The sync keeps this repo's copy of a file it cannot
+#      mark (one CI loads, or one side empty) and asks for a hand port. The branch
+#      does not change that file, so CHANGED_PATHS never names it.
 #
 # Any clause failing is not an error — the PR is simply left for a human, which
-# is exactly today's behavior. Set the repository variable
-# TEMPLATE_SYNC_AUTOMERGE=false to disable this step entirely (the workflow's
-# `if:` reads it), with no code change and nothing to re-sync from the template.
+# is exactly today's behavior. A caller that passes `automerge: false` to the
+# reusable workflow skips this step entirely.
 #
 # Env: PR_NUMBER, GH_TOKEN, GH_REPO; HAS_CONFLICTS, HAS_DELETIONS,
-# HAS_DOWNGRADES, ALL_DETERMINISTIC, CHANGED_PATHS from the sync + resolve steps.
+# HAS_DOWNGRADES, ALL_DETERMINISTIC, CHANGED_PATHS, MARKERLESS_FILES from the sync + resolve steps.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=.github/scripts/auto-resolve/lib.sh
-source "${SCRIPT_DIR}/auto-resolve/lib.sh"
+# shellcheck source=.github/scripts/lib/merge-conflict.bash
+source "$(cd "${SCRIPT_DIR}/lib" && pwd)/merge-conflict.bash"
 
 : "${PR_NUMBER:?PR_NUMBER required}"
 
@@ -50,6 +52,9 @@ refuse() {
 if [[ "${HAS_CONFLICTS:-false}" == "true" && "${ALL_DETERMINISTIC:-}" != "true" ]]; then
   refuse "at least one conflict needed a model, or is still unresolved."
 fi
+
+[[ -z "${MARKERLESS_FILES:-}" ]] ||
+  refuse "the sync kept this repo's copy of a file and applied no template change; it needs a hand port."
 
 [[ "${HAS_DOWNGRADES:-false}" != "true" ]] ||
   refuse "the sync dropped lines this repo had locally (adopter-ahead)."
@@ -79,7 +84,7 @@ gh pr merge "$PR_NUMBER" --squash --auto
 # still report success, which would leave a PR nobody is waiting on and nobody
 # is merging.
 if [[ "$(gh pr view "$PR_NUMBER" --json autoMergeRequest --jq '.autoMergeRequest != null')" != "true" ]]; then
-  echo "::error::auto-merge did not stick on PR #${PR_NUMBER}. Enable 'Allow auto-merge' in the repository settings, or set TEMPLATE_SYNC_AUTOMERGE=false."
+  echo "::error::auto-merge did not stick on PR #${PR_NUMBER}. Enable 'Allow auto-merge' in the repository settings, or pass \`automerge: false\` to the reusable sync workflow."
   exit 1
 fi
 echo "Auto-merge armed. The required checks still gate the merge."
