@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -31,22 +31,29 @@ jobs:
       - name: Validate configuration
         run: bash .github/scripts/validate-config.sh
 
+      # `uv run` needs a pyproject.toml to run in, and `pytest tests/` exits 4 on
+      # a missing directory. template-sync delivers neither file, so a consumer
+      # with no Python project runs nothing here instead of failing.
+      # validate-config.sh above stays ungated — it needs only the .claude/ tree
+      # the sync delivers.
       - name: Test Claude hooks
-        run: uv run --extra dev pytest tests/
+        if: hashFiles('pyproject.toml') != ''
+        run: |
+          [[ -d tests ]] || { echo "No tests/ directory; nothing to run."; exit 0; }
+          uv run --extra dev pytest tests/
 
   # Stable Required check: runs even when `validate` is cancelled/skipped, so a
   # protected branch never gets stuck on a check that never reports.
   validate-config-passed: # required-check: true
     if: always()
     needs: [validate]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           sparse-checkout: |
             .github/actions/report-job-result
-            .github/scripts
           persist-credentials: false
 
       - name: Report result
